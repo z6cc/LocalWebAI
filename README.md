@@ -35,15 +35,15 @@ We have successfully demonstrated the following capabilities:
 
 1.  **Clone the Repository** (if you haven't already).
     ```bash
-    # git clone ...
-    # cd LocalWebAIV2
+     git clone ...
+     cd LocalWebAI
     ```
 
 2.  **Ensure `llama-cpp-wasm` Artifacts are Present**:
     *   The POC relies on build artifacts (specifically `main.js` and `main.wasm`) from the `llama-cpp-wasm` project. Ensure the `llama-cpp-wasm/dist/llama-mt/` directory (for multi-threaded) or `llama-cpp-wasm/dist/llama-st/` (for single-threaded, though `mt` is currently configured in the demo) contains these files. If not, you may need to build `llama-cpp-wasm` first by following its own `build.sh` or `build-multi-thread.sh` scripts.
 
 3.  **Install Root Dependencies** (for the server):
-    *   Navigate to the project root (`LocalWebAIV2/`).
+    *   Navigate to the project root (`LocalWebAI/`).
     *   Run: `npm install`
 
 4.  **Install `ts-wrapper` Dependencies & Build**: 
