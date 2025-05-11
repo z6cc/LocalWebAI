@@ -14,7 +14,7 @@ We have successfully demonstrated the following capabilities:
 *   **Progress Reporting**: Visual feedback for model download and loading progress.
 *   **Streaming Output**: Token-by-token text generation streamed to the UI.
 *   **Web Worker**: Inference runs in a separate Web Worker to maintain UI responsiveness.
-*   **Basic Caching**: Models are cached in IndexedDB for faster subsequent loads (with a current limitation for models >1GiB, which are loaded but not cached to avoid browser errors -- see Roadmap).
+*   **Robust Caching**: Models are cached in IndexedDB for faster subsequent loads, now with chunking support for large models (addressing previous POC limitations).
 *   **Demo**: A functional `index.html` within the `ts-wrapper` directory showcases these features.
 *   **Server Setup**: Includes an Express.js server (`server.js`) at the project root, configured with necessary COOP/COEP headers for `SharedArrayBuffer` support, enabling multi-threaded Wasm execution.
 
@@ -61,15 +61,15 @@ We have successfully demonstrated the following capabilities:
 
 7.  **Test**: 
     *   Use the UI to load a GGUF model via URL or file upload.
-        *   Example Small Model (already used in POC): `https://huggingface.co/Qwen/Qwen1.5-1.8B-Chat-GGUF/resolve/main/qwen1_5-1_8b-chat-q4_k_m.gguf` (Note: >1GiB, will not be cached by current POC due to size limits, but will load for the session).
+        *   Example Small Model (previously mentioned as >1GiB with caching issues, now cacheable): `https://huggingface.co/Qwen/Qwen1.5-1.8B-Chat-GGUF/resolve/main/qwen1_5-1_8b-chat-q4_k_m.gguf`
     *   Enter a prompt and click "Generate Text".
     *   Check the browser's developer console for logs and any errors.
 
 ## Next Steps & Future Vision
 
-This POC lays the groundwork for a much more comprehensive library. Key next steps include:
+This POC lays the groundwork for a much more comprehensive library. Key next steps from Phase 1 of our roadmap include:
 
-*   Implementing robust caching for large models in IndexedDB (via chunking).
+*   **[COMPLETED]** Implementing robust caching for large models in IndexedDB (via chunking).
 *   Developing a Node.js runtime for the library.
 *   Expanding model format support (ONNX, SafeTensors).
 *   Adding higher-level task APIs (chat, embeddings, summarize).

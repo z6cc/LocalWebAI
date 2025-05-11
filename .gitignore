@@ -63,3 +63,5 @@ models/*.bin
 *.tmp
 *.bak
 *.patch 
+
+full.txt

@@ -29,7 +29,7 @@ const workerActions = {
   LOAD_MODEL_DATA: 'LOAD_MODEL_DATA',
 };
 
-const MAX_CACHEABLE_SIZE = 1 * 1024 * 1024 * 1024; // 1 GiB
+// const MAX_CACHEABLE_SIZE = 1 * 1024 * 1024 * 1024; // 1 GiB -- This is no longer needed as ModelCache handles chunking.
 
 export class LlamaRunner {
   private worker: Worker | null = null;
@@ -155,7 +155,8 @@ export class LlamaRunner {
       // 1. Try fetching from cache
       modelData = await this.modelCache.getModelFromCache(actualModelId);
       if (modelData) {
-        if (progressCallback) progressCallback(1, 1); // Cached, so 100%
+        if (progressCallback) progressCallback(modelData.byteLength, modelData.byteLength); // Cached, so 100%
+        console.log(`Model ${actualModelId} found in cache. Loading from cache.`);
         this.worker?.postMessage({
           event: workerActions.LOAD_MODEL_DATA,
           modelData: modelData,
@@ -165,6 +166,7 @@ export class LlamaRunner {
       }
 
       // 2. If not cached, fetch/read the model
+      console.log(`Model ${actualModelId} not found in cache. Proceeding to load from source.`);
       try {
         if (typeof source === 'string') {
           const response = await fetch(source);
@@ -209,14 +211,19 @@ export class LlamaRunner {
         }
 
         if (modelData) {
-          // TODO: Implement chunking for IndexedDB to support caching models larger than MAX_CACHEABLE_SIZE
-          if (modelData.byteLength < MAX_CACHEABLE_SIZE) {
-            await this.modelCache.cacheModel(actualModelId, modelData);
-          } else {
-            console.warn(
-              `Model ${actualModelId} is too large to cache (${(modelData.byteLength / (1024*1024)).toFixed(2)} MB). Max cacheable size: ${(MAX_CACHEABLE_SIZE / (1024*1024)).toFixed(2)} MB. Skipping cache.`
-            );
-          }
+          // The new ModelCache handles chunking, so the explicit size check is removed.
+          // if (modelData.byteLength < MAX_CACHEABLE_SIZE) { // Old check
+          //   await this.modelCache.cacheModel(actualModelId, modelData);
+          // } else {
+          //   console.warn(
+          //     `Model ${actualModelId} is too large to cache (${(modelData.byteLength / (1024*1024)).toFixed(2)} MB). Max cacheable size: ${(MAX_CACHEABLE_SIZE / (1024*1024)).toFixed(2)} MB. Skipping cache.`
+          //   );
+          // }
+
+          // Pass modelFileName and modelContentType if available (from File object)
+          const modelFileName = typeof source !== 'string' ? source.name : undefined;
+          const modelContentType = typeof source !== 'string' ? source.type : undefined;
+          await this.modelCache.cacheModel(actualModelId, modelData, modelFileName, modelContentType);
 
           this.worker?.postMessage({
             event: workerActions.LOAD_MODEL_DATA,

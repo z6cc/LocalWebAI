@@ -33,7 +33,7 @@ This document outlines the planned features and development trajectory for the L
     *   **Node.js Runtime**: Create a parallel runtime environment for Node.js using `worker_threads` and native Wasm bindings (if beneficial over Emscripten's Node output).
     *   Unified API surface for both browser and Node.js environments.
 *   **Model Management**:
-    *   **Chunking for IndexedDB**: Implement robust model caching for large models by splitting them into manageable chunks (addresses current POC limitation).
+    *   **[COMPLETED] Chunking for IndexedDB**: Implemented robust model caching for large models by splitting them into manageable chunks, addressing the current POC limitation.
     *   **Advanced Model Loading**: Progress reporting for all stages (download, VFS loading, Wasm initialization).
     *   Introduce basic model metadata handling.
 *   **Performance**:
