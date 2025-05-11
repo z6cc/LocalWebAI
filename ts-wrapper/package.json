@@ -1,0 +1,26 @@
+{
+  "name": "ts-wrapper",
+  "version": "0.1.0",
+  "description": "TypeScript wrapper for llama.cpp Wasm",
+  "main": "dist/llama-runner.js",
+  "types": "dist/llama-runner.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "llama",
+    "wasm",
+    "llm",
+    "typescript"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.0.0" 
+  },
+  "files": [
+    "dist"
+  ]
+} 

@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Llama.cpp Wasm Runner POC</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f7f9;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 700px;
+            margin-top: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+        input[type="text"], input[type="file"], textarea {
+            width: calc(100% - 20px);
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+        .output-area, .progress-area {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            min-height: 50px;
+            white-space: pre-wrap; /* Preserve line breaks */
+            word-wrap: break-word;
+        }
+        .progress-bar-container {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 4px;
+            margin-top: 5px;
+            height: 20px;
+        }
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background-color: #3498db;
+            border-radius: 4px;
+            text-align: center;
+            line-height: 20px;
+            color: white;
+            font-size: 12px;
+        }
+        .hidden {
+            display: none;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #777;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Local Llama Runner POC</h1>
+
+        <div class="input-group">
+            <label for="modelUrl">Model URL (e.g., .gguf from Hugging Face):</label>
+            <input type="text" id="modelUrl" placeholder="https://huggingface.co/.../model.gguf">
+            <label for="modelFile">Or Upload Model File:</label>
+            <input type="file" id="modelFile" accept=".gguf">
+            <button id="loadModelBtn">Load Model</button>
+        </div>
+
+        <div class="progress-area">
+            <label>Model Loading Progress:</label>
+            <div id="modelProgressText">Not started</div>
+            <div class="progress-bar-container">
+                <div id="modelProgressBar" class="progress-bar">0%</div>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label for="prompt">Prompt:</label>
+            <textarea id="prompt" placeholder="Enter your prompt here..."></textarea>
+            <button id="generateBtn" disabled>Generate Text</button>
+        </div>
+
+        <div class="output-area">
+            <label>Generated Text:</label>
+            <div id="resultText"></div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Powered by Llama.cpp & WebAssembly</p>
+    </div>
+
+    <!-- Ensure this path is correct after compiling ts-wrapper -->
+    <script type="module">
+        // Dynamically import the LlamaRunner. Adjust path as necessary.
+        // This assumes index.html is in ts-wrapper/ and dist/ is the output directory.
+        import { LlamaRunner } from './dist/llama-runner.js';
+
+        const modelUrlInput = document.getElementById('modelUrl');
+        const modelFileInput = document.getElementById('modelFile');
+        const loadModelBtn = document.getElementById('loadModelBtn');
+        const modelProgressText = document.getElementById('modelProgressText');
+        const modelProgressBar = document.getElementById('modelProgressBar');
+        const promptInput = document.getElementById('prompt');
+        const generateBtn = document.getElementById('generateBtn');
+        const resultText = document.getElementById('resultText');
+
+        // --- Configuration: Adjust these paths --- 
+        // These paths are relative to where this index.html is served from.
+        // Assumes llama-cpp-wasm is a sibling directory to ts-wrapper,
+        // and we use the single-threaded build artifacts.
+        const WORKER_PATH = './dist/worker.js'; // Compiled from ts-wrapper/worker.ts
+        const WASM_MODULE_PATH = '../llama-cpp-wasm/dist/llama-mt/main.js'; // JS glue from llama-cpp-wasm (MULTI-THREADED)
+        const WASM_PATH = '../llama-cpp-wasm/dist/llama-mt/main.wasm';    // .wasm file from llama-cpp-wasm (MULTI-THREADED)
+        // --- End Configuration ---
+
+        let llamaRunner;
+        try {
+            llamaRunner = new LlamaRunner(WORKER_PATH, WASM_MODULE_PATH, WASM_PATH);
+            console.log("LlamaRunner instantiated.");
+        } catch (e) {
+            console.error("Failed to instantiate LlamaRunner:", e);
+            modelProgressText.textContent = "Error initializing runner: " + e.message;
+            alert("Error initializing LlamaRunner. Check console for details and ensure paths are correct.");
+        }
+
+
+        loadModelBtn.addEventListener('click', async () => {
+            if (!llamaRunner) return;
+            const modelUrl = modelUrlInput.value;
+            const modelFile = modelFileInput.files[0];
+            let source;
+            let modelId;
+
+            if (modelFile) {
+                source = modelFile;
+                modelId = `file-${modelFile.name}-${modelFile.size}`;
+            } else if (modelUrl) {
+                source = modelUrl;
+                modelId = modelUrl;
+            } else {
+                alert("Please provide a model URL or select a model file.");
+                return;
+            }
+
+            loadModelBtn.disabled = true;
+            generateBtn.disabled = true;
+            resultText.textContent = '';
+            modelProgressText.textContent = 'Starting model load...';
+            modelProgressBar.style.width = '0%';
+            modelProgressBar.textContent = '0%';
+
+            try {
+                console.log(`Loading model: ${modelId}`);
+                await llamaRunner.loadModel(source, modelId, (loaded, total) => {
+                    const percentage = total > 0 ? Math.round((loaded / total) * 100) : 0;
+                    modelProgressText.textContent = `Loading: ${percentage}% (${(loaded / 1024 / 1024).toFixed(2)} MB / ${(total / 1024 / 1024).toFixed(2)} MB)`;
+                    modelProgressBar.style.width = `${percentage}%`;
+                    modelProgressBar.textContent = `${percentage}%`;
+                });
+                modelProgressText.textContent = 'Model loaded successfully!';
+                generateBtn.disabled = false;
+                console.log("Model loaded successfully.");
+            } catch (error) {
+                console.error("Error loading model:", error);
+                modelProgressText.textContent = `Error loading model: ${error.message}`;
+                alert(`Error loading model: ${error.message}`);
+            } finally {
+                loadModelBtn.disabled = false;
+            }
+        });
+
+        generateBtn.addEventListener('click', () => {
+            if (!llamaRunner) return;
+            const prompt = promptInput.value;
+            if (!prompt) {
+                alert("Please enter a prompt.");
+                return;
+            }
+
+            generateBtn.disabled = true;
+            resultText.textContent = ''; // Clear previous results
+            let currentLine = '';
+
+            console.log("Starting text generation...");
+            try {
+                 llamaRunner.generateText(
+                    prompt,
+                    { temp: 0.4, n_predict: 400 },
+                    (token) => {
+                        // Stream tokens
+                        currentLine += token;
+                        resultText.textContent = currentLine; // Continuously update
+                    },
+                    () => {
+                        // Completion
+                        generateBtn.disabled = false;
+                        console.log("Text generation complete.");
+                        modelProgressText.textContent = 'Generation complete.';
+                    }
+                );
+            } catch (error) {
+                console.error("Error during text generation:", error);
+                alert(`Error generating text: ${error.message}`);
+                resultText.textContent = `Error: ${error.message}`;
+                generateBtn.disabled = false;
+            }
+        });
+
+        // Initial check for file input to prioritize it
+        modelFileInput.addEventListener('change', () => {
+            if (modelFileInput.files.length > 0) {
+                modelUrlInput.value = ''; // Clear URL if file is selected
+            }
+        });
+        modelUrlInput.addEventListener('input', () => {
+             if (modelUrlInput.value) {
+                modelFileInput.value = ''; // Clear file if URL is typed
+            }
+        });
+
+    </script>
+</body>
+</html> 

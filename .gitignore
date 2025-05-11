@@ -1,0 +1,65 @@
+# Node.js and npm
+node_modules/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+pnpm-lock.yaml
+
+# TypeScript
+*.tsbuildinfo
+
+# Build output directories (adjust if your project structure differs)
+dist/
+build/
+coverage/
+lib/
+
+# llama-cpp-wasm specific (if built within the project, good to ignore its build artifacts here too)
+# If llama-cpp-wasm is a submodule or separate checkout, these might be handled by its own .gitignore
+# but added here for completeness if its build products are in the main repo.
+llama-cpp-wasm/build/
+llama-cpp-wasm/dist/
+
+# emsdk specific (if downloads or local configs are within the project)
+emsdk/downloads/
+emsdk/upstream/emscripten/cache/
+# Add other emsdk specific generated files or user configs if necessary
+
+# Development environment
+.DS_Store
+Thumbs.db
+.env
+.env*.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE and editor files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Operating System files
+._*
+.Spotlight-V100
+.Trashes
+
+# SSL Certificates (if generated locally and should not be committed)
+key.pem
+cert.pem
+
+# Models (GGUF files, etc. - usually large and not versioned with code)
+# You might want to keep this if models are downloaded into a specific directory
+models/*.gguf
+models/*.bin
+
+# Other
+*.tmp
+*.bak
+*.patch 

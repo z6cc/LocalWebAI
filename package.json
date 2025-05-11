@@ -1,0 +1,15 @@
+{
+  "name": "local-web-ai-v2",
+  "version": "0.1.0",
+  "description": "Local-First AI Model Runner Project",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.17.1" 
+  }
+} 
