@@ -4,6 +4,8 @@ This project aims to create a powerful TypeScript library that enables developer
 
 This project is currently in the **Proof of Concept (POC)** stage, demonstrating the core feasibility of running GGUF models (like phi and Qwen) in the browser using WebAssembly.
 
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/mzazakeith/LocalWebAI)
+
 ## Current Status: POC Achieved
 
 We have successfully demonstrated the following capabilities:
